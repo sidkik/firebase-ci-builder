@@ -36,7 +36,7 @@
 #   | Jul 2021 | 16.5.0 | 7.19.1 |
 
 # Note: IF YOU CHANGE THIS, change the '-nodeXX' suffix within 'build' script.
-FROM node:16-alpine
+FROM node:18-alpine
 
 # Version of 'firebase-tools' is also our version
 #
@@ -53,6 +53,8 @@ ENV USER user
 
 # Suppress npm update announcements
 RUN npm config set update-notifier false
+# RUN npm config set registry https://npm.pkg.github.com
+COPY .npmrc /root/.npmrc
 
 RUN apk --no-cache add openjdk11-jre-headless
 
@@ -60,7 +62,7 @@ RUN apk --no-cache add openjdk11-jre-headless
 #
 RUN apk --no-cache add bash curl
 
-RUN yarn global add firebase-tools@${FIREBASE_VERSION} \
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc yarn global add @sidkik/firebase-tools@${FIREBASE_VERSION} \
   && yarn cache clean
 
 # Alternative:
@@ -86,9 +88,9 @@ RUN yarn global add firebase-tools@${FIREBASE_VERSION} \
 #
 # Note: Adding as separate layers, with least changing first.
 #
-RUN firebase setup:emulators:database
+# RUN firebase setup:emulators:database
 RUN firebase setup:emulators:firestore
-#RUN firebase setup:emulators:storage
+RUN firebase setup:emulators:storage
 #RUN firebase setup:emulators:pubsub \
 #  && rm /root/.cache/firebase/emulators/pubsub-emulator*.zip
 
