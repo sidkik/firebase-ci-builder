@@ -3,7 +3,7 @@
 #
 # Provides:
 #   - 'firebase' CLI, with some emulators pre-installed
-#   - node.js and npm >=7.7.0
+#   - node.js 16 and npm 8
 #   - bash, curl
 #   - a user 'user' created (can be activated manually)
 #
@@ -32,6 +32,9 @@
 #
 #              | Node   | npm    |
 #   | -------- | ------ | ------ |
+#   | May 2022 | 18.2.0 |  8.9.0 |  <-- change to node.js 18
+#   | Mar 2022 | 16.14.0|  8.3.1 |
+#   | Jan 2022 | 16.13.1|  8.1.2 |
 #   | Sep 2021 | 16.8.0 | 7.21.0 |
 #   | Jul 2021 | 16.5.0 | 7.19.1 |
 
@@ -64,12 +67,9 @@ RUN apk --no-cache add bash curl
 
 RUN --mount=type=secret,id=npmrc,target=/root/.npmrc yarn global add @sidkik/firebase-tools@${FIREBASE_VERSION} \
   && yarn cache clean
-
-# Alternative:
-#
-# Note: With this approach (from Firebase docs), we are not in charge of the version (which we.. like to be :).
-#
-#RUN curl -sL https://firebase.tools | bash
+  #
+  # Note: The installation approach from Firebase docs does not allow stating the version:
+  #   'curl -sL https://firebase.tools | bash'
 
 # Products that have 'setup:emulators:...' (only some of these are cached into the image, but you can tune the set):
 #
@@ -99,12 +99,12 @@ RUN firebase setup:emulators:storage
 RUN firebase setup:emulators:ui \
   && rm -rf /root/.cache/firebase/emulators/ui-v*.zip
 
-  # $ ls .cache/firebase/emulators/
-  #   cloud-firestore-emulator-v1.13.1.jar    (57.7 MB)
-  #   cloud-storage-rules-runtime-v1.0.1.jar  (31.2 MB)   ; NOT PRE-FETCHED (people can use it; will get downloaded if they do)
-  #   firebase-database-emulator-v4.7.2.jar   (27.6 MB)
-  #   pubsub-emulator-0.1.0                   (37.9 MB)   ; NOT PRE-FETCHED (-''-)
-  #   ui-v1.6.0                               (13.8 MB)
+  # $ ls /root/.cache/firebase/emulators/
+  #   cloud-firestore-emulator-v1.14.3.jar    (57.6 MB)
+  #   cloud-storage-rules-runtime-v1.0.2.jar  (34.1 MB)   <-- old version
+  #   firebase-database-emulator-v4.8.0.jar   (32.1 MB)
+  #   pubsub-emulator-0.1.0                   (37.9 MB)   <-- old version
+  #   ui-v1.7.0                               (15.1 MB)
 
 # Setting the env.var so 'firebase-tools' finds the images.
 #

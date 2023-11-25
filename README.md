@@ -1,6 +1,6 @@
 # firebase-ci-builder
 
-Docker image for projects needing to run Firebase CLI, `npm` and Firebase emulation (which requires Java).
+Docker image for projects needing to run Firebase CLI or Firebase emulation (which requires Java).
 
 Contains instructions on building locally, and pushing to Google Cloud Registry that you control.
 
@@ -8,31 +8,19 @@ Contains instructions on building locally, and pushing to Google Cloud Registry 
 
 - `firebase-tools` & emulators, some prefetched
 - OpenJDK JRE 11
-- node.js 16
+- node.js 18
 - `npm`
 
 In addition to [BusyBox](https://en.wikipedia.org/wiki/BusyBox), the image has some command line comfort:
 
-|        | version  |
-| ------ | -------- |
-| `bash` | v.5.1.0+ |
-| `curl` | 7.77.0+  |
+|        | version   |
+| ------ | --------- |
+| `bash` | v.5.1.16+ |
+| `curl` | 7.80.0+   |
 
 Naturally, you may add more by deriving the Dockerfile or just forking it and editing to your liking.
 
-**Other images**
-
-- Community [Firebase image](https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/firebase)
-
-  The info that there's emulation (that requires Java) has not reached it, yet (Jun 2021). There is an [issue](https://github.com/GoogleCloudPlatform/cloud-builders-community/issues/441) raised but no PR. Pushing this code to the community repo would be the right thing to do but feels like too much friction for the author.
-
-- [`timbru31/docker-java-node`](https://github.com/timbru31/docker-java-node)
-
-  This repo is mentioned as a foundation having both Java and Node. However, the author faced problems building it (Mar-21). Being based on "Azul" OpenJDK image wasn't reaffirming for general use, either.
-
-  The repo takes a JDK/JRE base image and installs Node on top of it. This repo does the opposite.
-
-**Approach**
+**Publishing / customization approach**
 
 Publishing Docker images may be costly (you are charged by the downloads, and images are big), so the approach taken here is that you build the image on your own (maybe tuning it, eg. changing the set of pre-fetched emulators), and push it to a private registry that _your_ projects use.
 
@@ -91,10 +79,10 @@ You can do this simply to see that the build succeeds.
 $ ./build
 [+] Building 66.3s (11/11) FINISHED
 ...
- => => naming to docker.io/library/firebase-ci-builder:9.17.0-node16-npm7
+ => => naming to docker.io/library/firebase-ci-builder:10.6.0-node16-npm8
 ```
 
-It should result in an image of ~467 <!-- was: ~461, ~473, ~482, ~496, ~533, ~557, ~706, ~679--> MB in size, containing:
+It should result in an image of ~490 <!-- was: ~448, ~443, ~461, ~473, ~482, ~496, ~533, ~557, ~706, ~679--> MB in size, containing:
 
 - JDK
 - `firebase` CLI
@@ -108,10 +96,12 @@ You can check the size by:
 ```
 $ docker image ls firebase-ci-builder
 REPOSITORY            TAG                  IMAGE ID       CREATED          SIZE
-firebase-ci-builder   9.17.0-node16-npm7   65419911b290   33 minutes ago   467MB
+firebase-ci-builder   11.0.1-node18-npm8   8f394d6a604f   17 seconds ago   490MB
 ```
 
 _The image size depends on which emulators are cached into the image. You can tune that pretty easily by commenting/uncommenting blocks in `Dockerfile`, to match your needs._
+
+_Pumping to Node.js 18 caused a +42MB increase (over Node.js 16), but we want to keep to the latest stable tools._
 
 ## Push to the Container Registry
 
@@ -162,7 +152,7 @@ It is good to occasionally remove unneeded files from the Container Registry. Th
 You can now use the image eg. in Cloud Build as:
 
 ```
-gcr.io/$PROJECT_ID/firebase-ci-builder:9.17.0-node16-npm7
+gcr.io/$PROJECT_ID/firebase-ci-builder:10.6.0-node16-npm8
 ```
 
 > Note: If you are using the image within the same project, you can leave `$PROJECT_ID` in the `cloudbuild.yaml`. Cloud Build knows to replace it with the current GCP project.
@@ -193,6 +183,26 @@ Emulator images are left in the `/root/.cache` folder, and the emulators find th
 If Cloud Build becomes more home (and user) friendly, at some point, we could build the image differently.
 
 > Where a Docker image is being used _should not affect_ its building in this way. What this means is that we're currently building a Firebase Emulators image **optimized for Cloud Build** instead of use in any CI/CD system supporting Docker images as build steps.
+
+## Alternatives
+
+- Community [Firebase image](https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/firebase)
+
+  The info that there's emulation (that requires Java) has not reached it, yet (Jun 2021). There is an [issue](https://github.com/GoogleCloudPlatform/cloud-builders-community/issues/441) raised but no PR. Pushing this code to the community repo would be the right thing to do but feels like too much friction for the author.
+
+- [`timbru31/docker-java-node`](https://github.com/timbru31/docker-java-node)
+
+  This repo is mentioned as a foundation having both Java and Node. However, the author faced problems building it (Mar-21). Being based on "Azul" OpenJDK image wasn't reaffirming for general use, either.
+
+  The repo takes a JDK/JRE base image and installs Node on top of it. This repo does the opposite.
+
+---
+
+Obviously, some consolidation of these efforts would be Good For All.
+
+It is unfortunate this support is not arising from the Firebase team itself. The author thinks it should - but it can also be a community endeavour, where we show Firebase that a better Emulator Experience (EX?) can be reached.
+
+One crucial part of this would be speeding up the emulators. The aim should be much higher than the official package - let's say 5x faster, 5x easier, and sandboxed.
 
 ## References
 

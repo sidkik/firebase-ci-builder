@@ -1,5 +1,38 @@
 # Changelog
 
+## 14-Jun-2022
+
+- Preloading also Realtime Database; 11.0.1b
+
+## 28-May-2022
+
+- Moved to Node.js 18; `firebase-tools` 11.0.1
+
+## 22-May-2022
+
+- Update to `firebase-tools` 11.0.0
+
+## 9-Apr-2022
+
+- Update to `firebase-tools` 10.6.0
+
+## 20-Mar-2022
+
+- Update to `firebase-tools` 10.4.0
+
+## 6-Mar-2022
+
+- Bumped to `firebase-tools` 10.2.2
+- Disabled `database` emulator (not personally needing it)
+
+## 9-Jan-2022
+
+- Bumped to Firebase CLI 10.0.1; Node 16 now comes with npm 8 causing a name change of the image.
+
+## 11-Dec-2021
+
+- Added license for Google's Dev Library
+
 ## 3-Sep-2021
 
 - Upgraded to 9.17.0
